@@ -8,11 +8,11 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/keywatch/agent/internal/domain"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/domain"
 )
 
 // ShipUseCase drains the ring buffer and delivers each Snapshot to the
-// Keywatch backend via the Shipper port. It owns the retry policy —
+// Diagnostack backend via the Shipper port. It owns the retry policy —
 // the Shipper itself is a single-attempt HTTP call with no retry.
 type ShipUseCase struct {
 	shipper domain.Shipper

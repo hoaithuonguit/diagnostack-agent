@@ -122,13 +122,13 @@ func (h *CollectHealth) emitActionableHint(err error) {
 	switch {
 	case isAuthError(msg):
 		h.logger.Error("ACTION NEEDED — Redis authentication failure",
-			slog.String("check", "redis.password in /etc/keywatch/config.yaml or KEYWATCH_REDIS_PASSWORD env var"),
+			slog.String("check", "redis.password in /etc/diagnostack/config.yaml or DIAGNOSTACK_REDIS_PASSWORD env var"),
 			slog.String("verify", "redis-cli -h <addr> AUTH <password>"),
 		)
 
 	case isConnectionRefused(msg):
 		h.logger.Error("ACTION NEEDED — cannot connect to Redis",
-			slog.String("check_1", "redis.addr in /etc/keywatch/config.yaml"),
+			slog.String("check_1", "redis.addr in /etc/diagnostack/config.yaml"),
 			slog.String("check_2", "Redis process is running: systemctl status redis"),
 			slog.String("check_3", "firewall allows agent → Redis on the configured port"),
 		)
@@ -143,7 +143,7 @@ func (h *CollectHealth) emitActionableHint(err error) {
 	default:
 		h.logger.Error("ACTION NEEDED — Redis collect failing, manual investigation required",
 			slog.String("last_error", msg),
-			slog.String("docs", "https://docs.keywatch.io/agent/troubleshooting"),
+			slog.String("docs", "https://docs.diagnostack.io/agent/troubleshooting"),
 		)
 	}
 }

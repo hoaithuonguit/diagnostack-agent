@@ -1,4 +1,4 @@
-module github.com/keywatch/agent
+module github.com/hoaithuonguit/diagnostack-agent
 
 go 1.22
 

@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/keywatch/agent/internal/domain"
-	"github.com/keywatch/agent/internal/infra/buffer"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/domain"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/infra/buffer"
 )
 
 var noopLogger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))

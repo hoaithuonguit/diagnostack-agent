@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/keywatch/agent/config"
+	"github.com/hoaithuonguit/diagnostack-agent/config"
 )
 
 func TestLoad_Defaults(t *testing.T) {
@@ -42,9 +42,9 @@ func TestLoad_EnvOverridesFile(t *testing.T) {
 	path := filepath.Join(dir, "config.yaml")
 	_ = os.WriteFile(path, []byte("api:\n  api_key: from-file\n"), 0o644)
 
-	t.Setenv("KEYWATCH_API_KEY", "from-env")
-	t.Setenv("KEYWATCH_SERVER_LABEL", "env-server")
-	t.Setenv("KEYWATCH_REDIS_ADDR", "10.0.0.1:6380")
+	t.Setenv("DIAGNOSTACK_API_KEY", "from-env")
+	t.Setenv("DIAGNOSTACK_SERVER_LABEL", "env-server")
+	t.Setenv("DIAGNOSTACK_REDIS_ADDR", "10.0.0.1:6380")
 
 	cfg, err := config.Load(path)
 	if err != nil {
@@ -74,9 +74,9 @@ func TestLoad_MissingAPIKey(t *testing.T) {
 }
 
 func TestLoad_MissingFileUsesDefaults(t *testing.T) {
-	t.Setenv("KEYWATCH_API_KEY", "env-key")
+	t.Setenv("DIAGNOSTACK_API_KEY", "env-key")
 	// Point to a path that does not exist.
-	cfg, err := config.Load("/tmp/keywatch-nonexistent-config-xyz.yaml")
+	cfg, err := config.Load("/tmp/diagnostack-nonexistent-config-xyz.yaml")
 	if err != nil {
 		t.Fatalf("missing file should not error (uses defaults): %v", err)
 	}

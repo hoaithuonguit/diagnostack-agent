@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
-# install.sh — Keywatch agent installation script
+# install.sh — Diagnostack agent installation script
 # Usage: sudo bash install.sh
 #
 # What this does:
-#   1. Creates the keywatch system user (no login shell)
-#   2. Creates /etc/keywatch/ with the default config
-#   3. Copies the binary to /usr/local/bin/keywatch-agent
+#   1. Creates the diagnostack system user (no login shell)
+#   2. Creates /etc/diagnostack/ with the default config
+#   3. Copies the binary to /usr/local/bin/diagnostack-agent
 #   4. Installs and enables the systemd service
 #
-# Run after building: go build -o keywatch-agent ./cmd/agent
+# Run after building: go build -o diagnostack-agent ./cmd/agent
 
 set -euo pipefail
 
-BINARY_NAME="keywatch-agent"
+BINARY_NAME="diagnostack-agent"
 INSTALL_DIR="/usr/local/bin"
-CONFIG_DIR="/etc/keywatch"
+CONFIG_DIR="/etc/diagnostack"
 CONFIG_FILE="$CONFIG_DIR/config.yaml"
-SERVICE_NAME="keywatch-agent"
+SERVICE_NAME="diagnostack-agent"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-SYSTEM_USER="keywatch"
+SYSTEM_USER="diagnostack"
 
 # ── Checks ────────────────────────────────────────────────────────────────────
 if [[ $EUID -ne 0 ]]; then
@@ -64,8 +64,8 @@ chmod 755 "$INSTALL_DIR/$BINARY_NAME"
 echo "→ Installing systemd service: $SERVICE_FILE"
 cat > "$SERVICE_FILE" << EOF
 [Unit]
-Description=Keywatch Redis Observability Agent
-Documentation=https://docs.keywatch.io/agent
+Description=Diagnostack Redis Observability Agent
+Documentation=https://docs.diagnostack.io/agent
 After=network.target
 
 [Service]
@@ -95,7 +95,7 @@ systemctl daemon-reload
 systemctl enable "$SERVICE_NAME"
 
 echo ""
-echo "✓ Keywatch agent installed successfully."
+echo "✓ Diagnostack agent installed successfully."
 echo ""
 echo "Next steps:"
 echo "  1. Edit $CONFIG_FILE — add your API key and server label"

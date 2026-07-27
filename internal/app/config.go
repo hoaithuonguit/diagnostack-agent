@@ -9,10 +9,10 @@ import "time"
 // injected into each use case at construction time.
 type AgentConfig struct {
 	// AgentID is the stable UUID identifying this agent installation.
-	// Auto-generated on first run and persisted to /etc/keywatch/agent_id.
+	// Auto-generated on first run and persisted to /etc/diagnostack/agent_id.
 	AgentID string
 
-	// ServerLabel is the human-readable name shown in the Keywatch UI.
+	// ServerLabel is the human-readable name shown in the Diagnostack UI.
 	ServerLabel string
 
 	// CollectInterval controls how often the agent polls Redis.

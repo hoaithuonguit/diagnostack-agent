@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/keywatch/agent/internal/app"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/app"
 )
 
 // captureLogger returns a logger that writes to a buffer and the buffer.

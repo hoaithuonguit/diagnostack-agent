@@ -2,7 +2,7 @@ package domain
 
 import "context"
 
-// Shipper is the outbound port for delivering a Snapshot to the Keywatch backend.
+// Shipper is the outbound port for delivering a Snapshot to the Diagnostack backend.
 // Concrete implementations live in internal/infra/http.
 //
 // Ship must be idempotent — the caller (ShipUseCase) may retry the same

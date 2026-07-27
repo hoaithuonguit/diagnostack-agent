@@ -1,6 +1,6 @@
-# Keywatch Agent — Installation & Operation Guide
+# Diagnostack Agent — Installation & Operation Guide
 
-This guide is for developers and DevOps engineers who want to install the Keywatch agent on a Redis server and connect it to the Keywatch dashboard.
+This guide is for developers and DevOps engineers who want to install the Diagnostack agent on a Redis server and connect it to the Diagnostack dashboard.
 
 **Time to complete:** 5–10 minutes.
 
@@ -10,7 +10,7 @@ This guide is for developers and DevOps engineers who want to install the Keywat
 
 You need:
 
-- A Keywatch account and an API key (get one at [keywatch.io](https://keywatch.io))
+- A Diagnostack account and an API key (get one at [diagnostack.io](https://diagnostack.io))
 - SSH access to the Linux server running Redis
 - `sudo` privileges on that server
 - Redis 4.0 or later
@@ -22,14 +22,14 @@ You need:
 On your Redis server, download the latest release:
 
 ```bash
-curl -Lo keywatch-agent https://github.com/keywatch/agent/releases/latest/download/keywatch-agent-linux-amd64
-chmod +x keywatch-agent
+curl -Lo diagnostack-agent https://github.com/hoaithuonguit/diagnostack-agent/releases/latest/download/diagnostack-agent-linux-amd64
+chmod +x diagnostack-agent
 ```
 
 Verify the download:
 
 ```bash
-./keywatch-agent --version
+./diagnostack-agent --version
 ```
 
 ---
@@ -44,25 +44,25 @@ sudo bash scripts/install.sh
 
 What it does:
 
-- Creates the `keywatch` system user (no login shell, no home directory)
-- Creates `/etc/keywatch/` with restricted permissions (only root and the keywatch user can read it)
-- Copies the binary to `/usr/local/bin/keywatch-agent`
+- Creates the `diagnostack` system user (no login shell, no home directory)
+- Creates `/etc/diagnostack/` with restricted permissions (only root and the diagnostack user can read it)
+- Copies the binary to `/usr/local/bin/diagnostack-agent`
 - Installs a systemd service with memory and CPU limits
 
 You will see output like:
 
 ```
-→ Creating system user: keywatch
-→ Creating config directory: /etc/keywatch
-→ Installing default config: /etc/keywatch/config.yaml
-→ Installing binary: /usr/local/bin/keywatch-agent
-→ Installing systemd service: /etc/systemd/system/keywatch-agent.service
-✓ Keywatch agent installed successfully.
+→ Creating system user: diagnostack
+→ Creating config directory: /etc/diagnostack
+→ Installing default config: /etc/diagnostack/config.yaml
+→ Installing binary: /usr/local/bin/diagnostack-agent
+→ Installing systemd service: /etc/systemd/system/diagnostack-agent.service
+✓ Diagnostack agent installed successfully.
 
 Next steps:
-  1. Edit /etc/keywatch/config.yaml — add your API key and server label
-  2. Start the agent:   sudo systemctl start keywatch-agent
-  3. Check the logs:    sudo journalctl -u keywatch-agent -f
+  1. Edit /etc/diagnostack/config.yaml — add your API key and server label
+  2. Start the agent:   sudo systemctl start diagnostack-agent
+  3. Check the logs:    sudo journalctl -u diagnostack-agent -f
 ```
 
 ---
@@ -72,7 +72,7 @@ Next steps:
 Open the config file:
 
 ```bash
-sudo nano /etc/keywatch/config.yaml
+sudo nano /etc/diagnostack/config.yaml
 ```
 
 There are two required fields — everything else has a safe default.
@@ -81,20 +81,20 @@ There are two required fields — everything else has a safe default.
 
 ```yaml
 api:
-  api_key: "kw_live_xxxxxxxxxxxxxxxxxxxx"   # ← paste your Keywatch API key here
+  api_key: "kw_live_xxxxxxxxxxxxxxxxxxxx"   # ← paste your Diagnostack API key here
 ```
 
 You can also set this as an environment variable instead of storing it in the file:
 
 ```bash
-# Add to /etc/systemd/system/keywatch-agent.service under [Service]:
-Environment="KEYWATCH_API_KEY=kw_live_xxxxxxxxxxxxxxxxxxxx"
+# Add to /etc/systemd/system/diagnostack-agent.service under [Service]:
+Environment="DIAGNOSTACK_API_KEY=kw_live_xxxxxxxxxxxxxxxxxxxx"
 ```
 
 ### Required: server label
 
 ```yaml
-server_label: "prod-redis-01"   # ← how this server appears in the Keywatch UI
+server_label: "prod-redis-01"   # ← how this server appears in the Diagnostack UI
 ```
 
 Choose something descriptive. If you leave this empty, the server's hostname is used.
@@ -118,7 +118,7 @@ redis:
   password: "your-redis-password"
 ```
 
-> **Security tip:** Use `KEYWATCH_REDIS_PASSWORD` as an environment variable instead of putting the password in the config file, especially if the config is checked into version control.
+> **Security tip:** Use `DIAGNOSTACK_REDIS_PASSWORD` as an environment variable instead of putting the password in the config file, especially if the config is checked into version control.
 
 ### Full config reference
 
@@ -131,8 +131,8 @@ redis:
   db: 0                     # Redis database number (almost always 0)
 
 api:
-  endpoint: "https://ingest.keywatch.io/v1/ingest"   # do not change
-  api_key: ""               # your Keywatch API key
+  endpoint: "https://ingest.diagnostack.io/v1/ingest"   # do not change
+  api_key: ""               # your Diagnostack API key
   timeout: 10s              # HTTP request timeout
 
 collect_interval: 15s       # how often to poll Redis (minimum 1s)
@@ -155,41 +155,41 @@ log:
 ## Step 4 — Start the agent
 
 ```bash
-sudo systemctl start keywatch-agent
+sudo systemctl start diagnostack-agent
 ```
 
 Check that it started cleanly:
 
 ```bash
-sudo journalctl -u keywatch-agent -f
+sudo journalctl -u diagnostack-agent -f
 ```
 
 You should see:
 
 ```
-INFO keywatch agent starting  agent_id=<uuid>  server_label=prod-redis-01  collect_interval=15s
+INFO diagnostack agent starting  agent_id=<uuid>  server_label=prod-redis-01  collect_interval=15s
 INFO redis collector connected  addr=127.0.0.1:6379
 INFO redis capability probe passed — all commands available  addr=127.0.0.1:6379
 ```
 
-Within 30 seconds your server will appear in the Keywatch dashboard.
+Within 30 seconds your server will appear in the Diagnostack dashboard.
 
 Enable the service to start on boot:
 
 ```bash
-sudo systemctl enable keywatch-agent
+sudo systemctl enable diagnostack-agent
 ```
 
 ---
 
 ## Redis ACL setup (Redis 6+ with ACLs enabled)
 
-If your Redis server uses ACLs, you need to create a dedicated user for the Keywatch agent with the minimum required permissions.
+If your Redis server uses ACLs, you need to create a dedicated user for the Diagnostack agent with the minimum required permissions.
 
 ### Minimum required permissions
 
 ```
-ACL SETUSER keywatch +ping +info +slowlog +latency ~* on ><password>
+ACL SETUSER diagnostack +ping +info +slowlog +latency ~* on ><password>
 ```
 
 Run this in `redis-cli` (connected as your admin user):
@@ -198,7 +198,7 @@ Run this in `redis-cli` (connected as your admin user):
 redis-cli -h 127.0.0.1 -p 6379 -a <admin-password>
 
 # In the redis-cli session:
-ACL SETUSER keywatch +ping +info +slowlog +latency ~* on >keywatch-secret-password
+ACL SETUSER diagnostack +ping +info +slowlog +latency ~* on >diagnostack-secret-password
 ACL SAVE   # persist to aclfile if you use one
 ```
 
@@ -207,7 +207,7 @@ Then update the agent config:
 ```yaml
 redis:
   addr: "127.0.0.1:6379"
-  password: "keywatch-secret-password"
+  password: "diagnostack-secret-password"
 ```
 
 ### What each permission does
@@ -227,7 +227,7 @@ redis:
 ```
 ERROR redis ACL check failed
   error="Redis ACL denied required command INFO: grant the INFO command:
-         ACL SETUSER keywatch +info ~* on ><password>"
+         ACL SETUSER diagnostack +info ~* on ><password>"
 ```
 
 The agent will exit. Fix the ACL and restart.
@@ -236,22 +236,22 @@ The agent will exit. Fix the ACL and restart.
 
 ```
 WARN SLOWLOG denied by Redis ACL — slowlog analysis will be unavailable
-  acl_hint="grant: ACL SETUSER keywatch +slowlog ~* on ><password>"
+  acl_hint="grant: ACL SETUSER diagnostack +slowlog ~* on ><password>"
 
 WARN redis capability probe: some commands are ACL-restricted
   disabled=["SLOWLOG"]
   impact="slowlog analysis unavailable — cannot identify slow commands"
 ```
 
-The agent starts and ships metrics. The Keywatch UI shows a banner on the affected tab explaining what is missing and how to fix it.
+The agent starts and ships metrics. The Diagnostack UI shows a banner on the affected tab explaining what is missing and how to fix it.
 
 ### Verify your ACL user
 
 ```bash
-redis-cli -h 127.0.0.1 -a keywatch-secret-password INFO server
+redis-cli -h 127.0.0.1 -a diagnostack-secret-password INFO server
 # Should return server info, not an error.
 
-redis-cli -h 127.0.0.1 -a keywatch-secret-password SLOWLOG GET 1
+redis-cli -h 127.0.0.1 -a diagnostack-secret-password SLOWLOG GET 1
 # Should return an empty list or a slowlog entry, not an error.
 ```
 
@@ -260,9 +260,9 @@ redis-cli -h 127.0.0.1 -a keywatch-secret-password SLOWLOG GET 1
 ## Upgrading the agent
 
 1. Download the new binary
-2. Stop the service: `sudo systemctl stop keywatch-agent`
-3. Replace the binary: `sudo cp keywatch-agent /usr/local/bin/keywatch-agent`
-4. Start the service: `sudo systemctl start keywatch-agent`
+2. Stop the service: `sudo systemctl stop diagnostack-agent`
+3. Replace the binary: `sudo cp diagnostack-agent /usr/local/bin/diagnostack-agent`
+4. Start the service: `sudo systemctl start diagnostack-agent`
 
 The config file is not touched during upgrade.
 
@@ -271,13 +271,13 @@ The config file is not touched during upgrade.
 ## Uninstalling
 
 ```bash
-sudo systemctl stop keywatch-agent
-sudo systemctl disable keywatch-agent
-sudo rm /etc/systemd/system/keywatch-agent.service
+sudo systemctl stop diagnostack-agent
+sudo systemctl disable diagnostack-agent
+sudo rm /etc/systemd/system/diagnostack-agent.service
 sudo systemctl daemon-reload
-sudo rm /usr/local/bin/keywatch-agent
-sudo rm -rf /etc/keywatch
-sudo userdel keywatch
+sudo rm /usr/local/bin/diagnostack-agent
+sudo rm -rf /etc/diagnostack
+sudo userdel diagnostack
 ```
 
 ---
@@ -321,20 +321,20 @@ api:
 or:
 
 ```bash
-export KEYWATCH_API_KEY="kw_live_xxxxxxxxxxxxxxxxxxxx"
+export DIAGNOSTACK_API_KEY="kw_live_xxxxxxxxxxxxxxxxxxxx"
 ```
 
 ### Agent starts but the server doesn't appear in the dashboard
 
-1. Check the logs for ship errors: `sudo journalctl -u keywatch-agent | grep ERROR`
-2. Verify network access to the API: `curl -v https://ingest.keywatch.io/v1/health`
-3. Check your API key is correct and active in the Keywatch dashboard
+1. Check the logs for ship errors: `sudo journalctl -u diagnostack-agent | grep ERROR`
+2. Verify network access to the API: `curl -v https://ingest.diagnostack.io/v1/health`
+3. Check your API key is correct and active in the Diagnostack dashboard
 
 ### Slowlog tab is empty in the dashboard
 
 Two possible causes:
 
-**ACL:** Run `redis-cli SLOWLOG GET 1` as the keywatch user. If you get a `NOPERM` error, add `+slowlog` to the ACL. See [Redis ACL setup](#redis-acl-setup-redis-6-with-acls-enabled).
+**ACL:** Run `redis-cli SLOWLOG GET 1` as the diagnostack user. If you get a `NOPERM` error, add `+slowlog` to the ACL. See [Redis ACL setup](#redis-acl-setup-redis-6-with-acls-enabled).
 
 **Slowlog threshold too high:** Redis only logs commands that exceed `slowlog-log-slower-than` (in microseconds). Check the current setting:
 
@@ -361,10 +361,10 @@ The agent is designed to use under 1% CPU and 30 MB RSS. If you see more:
 Switch to debug level to see every collect cycle:
 
 ```bash
-sudo nano /etc/keywatch/config.yaml
+sudo nano /etc/diagnostack/config.yaml
 # Set: log.level: "debug"
-sudo systemctl restart keywatch-agent
-sudo journalctl -u keywatch-agent -f
+sudo systemctl restart diagnostack-agent
+sudo journalctl -u diagnostack-agent -f
 ```
 
 Switch back to `info` when done — debug is verbose.
@@ -390,7 +390,7 @@ Each log line becomes a JSON object:
 |---|---|---|
 | CPU | < 1% per core | Enforced by systemd `CPUQuota=5%` |
 | Memory | < 30 MB RSS | systemd `MemoryMax=64M` (headroom for spikes) |
-| Disk | None during operation | Only `/etc/keywatch/agent_id` (~36 bytes) is written |
+| Disk | None during operation | Only `/etc/diagnostack/agent_id` (~36 bytes) is written |
 | Network | ~5 KB/request outbound | One HTTPS POST per collect interval |
 | Redis load | Negligible | Three read-only commands per interval; no `MONITOR` |
 
@@ -414,7 +414,7 @@ The agent does not read key names, values, TTLs, or any application data stored 
 
 ## Support
 
-- Documentation: [docs.keywatch.io](https://docs.keywatch.io)
-- ACL setup guide: [docs.keywatch.io/agent/acl-setup](https://docs.keywatch.io/agent/acl-setup)
-- Issues: [github.com/keywatch/agent/issues](https://github.com/keywatch/agent/issues)
-- Email: support@keywatch.io
+- Documentation: [docs.diagnostack.io](https://docs.diagnostack.io)
+- ACL setup guide: [docs.diagnostack.io/agent/acl-setup](https://docs.diagnostack.io/agent/acl-setup)
+- Issues: [github.com/hoaithuonguit/diagnostack-agent/issues](https://github.com/hoaithuonguit/diagnostack-agent/issues)
+- Email: support@diagnostack.io

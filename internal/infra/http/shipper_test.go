@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	infrahttp "github.com/keywatch/agent/internal/infra/http"
-	"github.com/keywatch/agent/internal/domain"
+	infrahttp "github.com/hoaithuonguit/diagnostack-agent/internal/infra/http"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/domain"
 )
 
 var noopLog = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError + 1}))

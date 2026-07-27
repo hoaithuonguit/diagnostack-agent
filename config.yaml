@@ -1,15 +1,15 @@
-# Keywatch Agent Configuration
-# Default location: /etc/keywatch/config.yaml
+# Diagnostack Agent Configuration
+# Default location: /etc/diagnostack/config.yaml
 #
 # All values can be overridden via environment variables — see docs.
 # The agent will use these defaults if a key is missing from this file.
 
 # agent_id is auto-generated on first run and persisted to
-# /etc/keywatch/agent_id. You can pin it here if you manage config via
+# /etc/diagnostack/agent_id. You can pin it here if you manage config via
 # configuration management tools (Ansible, Chef, etc.).
 agent_id: ""
 
-# server_label appears in the Keywatch UI to identify this Redis instance.
+# server_label appears in the Diagnostack UI to identify this Redis instance.
 # Defaults to the system hostname if empty.
 server_label: ""
 
@@ -19,10 +19,10 @@ redis:
   password: ""
   db: 0
 
-# Keywatch Ingestion API settings.
+# Diagnostack Ingestion API settings.
 api:
-  endpoint: "https://ingest.keywatch.io/v1/ingest"
-  # api_key is required. Prefer the KEYWATCH_API_KEY environment variable
+  endpoint: "https://ingest.diagnostack.io/v1/ingest"
+  # api_key is required. Prefer the DIAGNOSTACK_API_KEY environment variable
   # over setting it here to avoid storing secrets in the config file.
   api_key: ""
   timeout: 10s

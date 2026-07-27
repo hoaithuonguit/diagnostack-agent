@@ -1,4 +1,4 @@
-// Package yamlcfg is a minimal YAML parser for the keywatch agent config file.
+// Package yamlcfg is a minimal YAML parser for the diagnostack agent config file.
 // It handles only the subset of YAML used by config.yaml:
 //   - Simple key: value pairs
 //   - Nested sections (one level)

@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/keywatch/agent/internal/domain"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/domain"
 )
 
 // Ring is a fixed-capacity, thread-safe ring buffer of *domain.Snapshot.

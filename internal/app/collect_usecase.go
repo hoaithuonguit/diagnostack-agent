@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"github.com/keywatch/agent/internal/domain"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/domain"
 )
 
 // CollectUseCase polls Redis via the Collector port and enqueues the

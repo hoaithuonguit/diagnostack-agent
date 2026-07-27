@@ -1,13 +1,13 @@
-BINARY     := keywatch-agent
+BINARY     := diagnostack-agent
 BUILD_DIR  := ./bin
 CMD        := ./cmd/agent
-MODULE     := github.com/keywatch/agent
+MODULE     := github.com/hoaithuonguit/diagnostack-agent
 
 .PHONY: all build test lint clean tidy install
 
 all: tidy build test
 
-## build: compile the agent binary to ./bin/keywatch-agent
+## build: compile the agent binary to ./bin/diagnostack-agent
 build:
 	@mkdir -p $(BUILD_DIR)
 	go build -trimpath -ldflags="-s -w" -o $(BUILD_DIR)/$(BINARY) $(CMD)

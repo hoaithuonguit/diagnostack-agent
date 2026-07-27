@@ -89,7 +89,7 @@ config.yaml                    ← default configuration file
 ## Building
 
 ```bash
-git clone https://github.com/diagnostack/agent
+git clone https://github.com/hoaithuonguit/diagnostack-agent.git
 cd diagnostack-agent
 
 make build
@@ -148,7 +148,7 @@ redis:
 
 api:
   endpoint: "https://ingest.diagnostack.io/v1/ingest"
-  # Prefer diagnostack_API_KEY env var over storing the key in this file.
+  # Prefer DIAGNOSTACK_API_KEY env var over storing the key in this file.
   api_key: ""
   timeout: 10s
 
@@ -171,15 +171,15 @@ log:
 
 | Variable | Overrides |
 |---|---|
-| `diagnostack_API_KEY` | `api.api_key` |
-| `diagnostack_API_ENDPOINT` | `api.endpoint` |
-| `diagnostack_SERVER_LABEL` | `server_label` |
-| `diagnostack_REDIS_ADDR` | `redis.addr` |
-| `diagnostack_REDIS_PASSWORD` | `redis.password` |
-| `diagnostack_COLLECT_INTERVAL` | `collect_interval` |
-| `diagnostack_LOG_LEVEL` | `log.level` |
-| `diagnostack_LOG_FORMAT` | `log.format` |
-| `diagnostack_RETRY_MAX_ATTEMPTS` | `retry.max_attempts` |
+| `DIAGNOSTACK_API_KEY` | `api.api_key` |
+| `DIAGNOSTACK_API_ENDPOINT` | `api.endpoint` |
+| `DIAGNOSTACK_SERVER_LABEL` | `server_label` |
+| `DIAGNOSTACK_REDIS_ADDR` | `redis.addr` |
+| `DIAGNOSTACK_REDIS_PASSWORD` | `redis.password` |
+| `DIAGNOSTACK_COLLECT_INTERVAL` | `collect_interval` |
+| `DIAGNOSTACK_LOG_LEVEL` | `log.level` |
+| `DIAGNOSTACK_LOG_FORMAT` | `log.format` |
+| `DIAGNOSTACK_RETRY_MAX_ATTEMPTS` | `retry.max_attempts` |
 
 ---
 
@@ -191,7 +191,7 @@ If your Redis server uses ACLs (Redis 6+), create a dedicated user with the mini
 ACL SETUSER diagnostack +ping +info +slowlog +latency ~* on ><password>
 ```
 
-Then set `redis.password` (or `diagnostack_REDIS_PASSWORD`) to that password.
+Then set `redis.password` (or `DIAGNOSTACK_REDIS_PASSWORD`) to that password.
 
 ### What happens when commands are denied
 
@@ -247,7 +247,7 @@ When failures persist the agent emits a structured `ACTION NEEDED` message with 
 ```
 # Wrong password / ACL denied
 level=ERROR msg="ACTION NEEDED — Redis authentication failure"
-  check="redis.password in /etc/diagnostack/config.yaml or diagnostack_REDIS_PASSWORD env var"
+  check="redis.password in /etc/diagnostack/config.yaml or DIAGNOSTACK_REDIS_PASSWORD env var"
   verify="redis-cli -h <addr> AUTH <password>"
 
 # ACL missing permission

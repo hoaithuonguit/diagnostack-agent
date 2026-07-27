@@ -1,11 +1,11 @@
-// Command agent is the Keywatch observability agent.
-// It polls a local Redis server and ships metrics to the Keywatch Ingestion API.
+// Command agent is the Diagnostack observability agent.
+// It polls a local Redis server and ships metrics to the Diagnostack Ingestion API.
 //
 // Usage:
 //
-//	keywatch-agent [--config /path/to/config.yaml]
+//	diagnostack-agent [--config /path/to/config.yaml]
 //
-// Default config path: /etc/keywatch/config.yaml
+// Default config path: /etc/diagnostack/config.yaml
 package main
 
 import (
@@ -17,15 +17,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/keywatch/agent/config"
-	"github.com/keywatch/agent/internal/app"
-	infrahttp "github.com/keywatch/agent/internal/infra/http"
-	"github.com/keywatch/agent/internal/infra/buffer"
-	infraredis "github.com/keywatch/agent/internal/infra/redis"
+	"github.com/hoaithuonguit/diagnostack-agent/config"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/app"
+	infrahttp "github.com/hoaithuonguit/diagnostack-agent/internal/infra/http"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/infra/buffer"
+	infraredis "github.com/hoaithuonguit/diagnostack-agent/internal/infra/redis"
 )
 
 func main() {
-	configPath := flag.String("config", "", "path to config file (default: /etc/keywatch/config.yaml)")
+	configPath := flag.String("config", "", "path to config file (default: /etc/diagnostack/config.yaml)")
 	flag.Parse()
 
 	// ── Load config ──────────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ func main() {
 
 	// ── Set up structured logger ─────────────────────────────────────────────
 	logger := buildLogger(cfg.Log.Level, cfg.Log.Format)
-	logger.Info("keywatch agent starting",
+	logger.Info("diagnostack agent starting",
 		slog.String("agent_id", cfg.App.AgentID),
 		slog.String("server_label", cfg.App.ServerLabel),
 		slog.Duration("collect_interval", cfg.App.CollectInterval),
@@ -78,7 +78,7 @@ func main() {
 	// ── Run the scheduler ────────────────────────────────────────────────────
 	run(ctx, cfg.App, collectUC, shipUC, logger)
 
-	logger.Info("keywatch agent stopped",
+	logger.Info("diagnostack agent stopped",
 		slog.Int64("total_dropped_payloads", shipUC.DroppedTotal()),
 	)
 }

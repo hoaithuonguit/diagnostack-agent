@@ -1,9 +1,9 @@
-// Package config loads agent configuration from /etc/keywatch/config.yaml
+// Package config loads agent configuration from /etc/diagnostack/config.yaml
 // with environment variable overrides.
 //
 // Precedence (highest to lowest):
-//  1. Environment variables (KEYWATCH_*)
-//  2. /etc/keywatch/config.yaml
+//  1. Environment variables (DIAGNOSTACK_*)
+//  2. /etc/diagnostack/config.yaml
 //  3. Built-in defaults
 package config
 
@@ -16,15 +16,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/keywatch/agent/internal/app"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/app"
 )
 
 const (
 	// DefaultConfigPath is the Linux-standard location for the config file.
-	DefaultConfigPath = "/etc/keywatch/config.yaml"
+	DefaultConfigPath = "/etc/diagnostack/config.yaml"
 
 	// AgentIDFile stores the auto-generated agent UUID between restarts.
-	AgentIDFile = "/etc/keywatch/agent_id"
+	AgentIDFile = "/etc/diagnostack/agent_id"
 )
 
 // File mirrors the config.yaml structure exactly.
@@ -163,7 +163,7 @@ func defaults() File {
 	var f File
 	f.Redis.Addr = "127.0.0.1:6379"
 	f.Redis.DB = 0
-	f.API.Endpoint = "https://ingest.keywatch.io/v1/ingest"
+	f.API.Endpoint = "https://ingest.diagnostack.io/v1/ingest"
 	f.API.Timeout = 10 * time.Second
 	f.CollectInterval = 15 * time.Second
 	f.CollectTimeout = 10 * time.Second
@@ -180,33 +180,33 @@ func defaults() File {
 // applyEnvOverrides allows operators to override any config value via
 // environment variables without editing the file — useful for containers.
 func applyEnvOverrides(f *File) {
-	if v := os.Getenv("KEYWATCH_API_KEY"); v != "" {
+	if v := os.Getenv("DIAGNOSTACK_API_KEY"); v != "" {
 		f.API.APIKey = v
 	}
-	if v := os.Getenv("KEYWATCH_API_ENDPOINT"); v != "" {
+	if v := os.Getenv("DIAGNOSTACK_API_ENDPOINT"); v != "" {
 		f.API.Endpoint = v
 	}
-	if v := os.Getenv("KEYWATCH_SERVER_LABEL"); v != "" {
+	if v := os.Getenv("DIAGNOSTACK_SERVER_LABEL"); v != "" {
 		f.ServerLabel = v
 	}
-	if v := os.Getenv("KEYWATCH_REDIS_ADDR"); v != "" {
+	if v := os.Getenv("DIAGNOSTACK_REDIS_ADDR"); v != "" {
 		f.Redis.Addr = v
 	}
-	if v := os.Getenv("KEYWATCH_REDIS_PASSWORD"); v != "" {
+	if v := os.Getenv("DIAGNOSTACK_REDIS_PASSWORD"); v != "" {
 		f.Redis.Password = v
 	}
-	if v := os.Getenv("KEYWATCH_COLLECT_INTERVAL"); v != "" {
+	if v := os.Getenv("DIAGNOSTACK_COLLECT_INTERVAL"); v != "" {
 		if d, err := time.ParseDuration(v); err == nil {
 			f.CollectInterval = d
 		}
 	}
-	if v := os.Getenv("KEYWATCH_LOG_LEVEL"); v != "" {
+	if v := os.Getenv("DIAGNOSTACK_LOG_LEVEL"); v != "" {
 		f.Log.Level = v
 	}
-	if v := os.Getenv("KEYWATCH_LOG_FORMAT"); v != "" {
+	if v := os.Getenv("DIAGNOSTACK_LOG_FORMAT"); v != "" {
 		f.Log.Format = v
 	}
-	if v := os.Getenv("KEYWATCH_RETRY_MAX_ATTEMPTS"); v != "" {
+	if v := os.Getenv("DIAGNOSTACK_RETRY_MAX_ATTEMPTS"); v != "" {
 		if n, err := strconv.Atoi(v); err == nil {
 			f.Retry.MaxAttempts = n
 		}
@@ -216,7 +216,7 @@ func applyEnvOverrides(f *File) {
 // validate returns an error if required fields are missing.
 func validate(f *File) error {
 	if strings.TrimSpace(f.API.APIKey) == "" {
-		return fmt.Errorf("api.api_key is required (or set KEYWATCH_API_KEY)")
+		return fmt.Errorf("api.api_key is required (or set DIAGNOSTACK_API_KEY)")
 	}
 	if strings.TrimSpace(f.Redis.Addr) == "" {
 		return fmt.Errorf("redis.addr is required")

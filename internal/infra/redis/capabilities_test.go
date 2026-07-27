@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	infraredis "github.com/keywatch/agent/internal/infra/redis"
+	infraredis "github.com/hoaithuonguit/diagnostack-agent/internal/infra/redis"
 )
 
 // ── isACLDenied ──────────────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ func TestCapabilities_Disabled(t *testing.T) {
 func TestACLError_Message(t *testing.T) {
 	err := &infraredis.ACLError{
 		Command: "INFO",
-		Hint:    "grant: ACL SETUSER keywatch +info on",
+		Hint:    "grant: ACL SETUSER diagnostack +info on",
 	}
 	msg := err.Error()
 	if msg == "" {

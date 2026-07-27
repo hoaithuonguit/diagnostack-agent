@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/keywatch/agent/config"
+	"github.com/hoaithuonguit/diagnostack-agent/config"
 )
 
 // ── applyParsed via Load ──────────────────────────────────────────────────────
@@ -97,9 +97,9 @@ func TestLoad_AgentIDFromConfigFile(t *testing.T) {
 }
 
 func TestLoad_AgentIDIsGeneratedWhenMissing(t *testing.T) {
-	// Point AgentIDFile to a temp dir so we don't write to /etc/keywatch.
+	// Point AgentIDFile to a temp dir so we don't write to /etc/diagnostack.
 	// We can't override AgentIDFile easily without export, so we rely on
-	// the fact that /etc/keywatch/agent_id won't exist in the test environment
+	// the fact that /etc/diagnostack/agent_id won't exist in the test environment
 	// and the file write will silently fail (no root), giving us a fresh UUID.
 	dir := t.TempDir()
 	path := filepath.Join(dir, "config.yaml")
@@ -167,7 +167,7 @@ func TestLoad_EnvOverride_RetryMaxAttempts(t *testing.T) {
 	path := filepath.Join(dir, "config.yaml")
 	_ = os.WriteFile(path, []byte("api:\n  api_key: k\n"), 0o644)
 
-	t.Setenv("KEYWATCH_RETRY_MAX_ATTEMPTS", "10")
+	t.Setenv("DIAGNOSTACK_RETRY_MAX_ATTEMPTS", "10")
 
 	cfg, err := config.Load(path)
 	if err != nil {
@@ -183,7 +183,7 @@ func TestLoad_EnvOverride_CollectInterval(t *testing.T) {
 	path := filepath.Join(dir, "config.yaml")
 	_ = os.WriteFile(path, []byte("api:\n  api_key: k\n"), 0o644)
 
-	t.Setenv("KEYWATCH_COLLECT_INTERVAL", "30s")
+	t.Setenv("DIAGNOSTACK_COLLECT_INTERVAL", "30s")
 
 	cfg, err := config.Load(path)
 	if err != nil {
@@ -199,7 +199,7 @@ func TestLoad_EnvOverride_LogFormat(t *testing.T) {
 	path := filepath.Join(dir, "config.yaml")
 	_ = os.WriteFile(path, []byte("api:\n  api_key: k\n"), 0o644)
 
-	t.Setenv("KEYWATCH_LOG_FORMAT", "json")
+	t.Setenv("DIAGNOSTACK_LOG_FORMAT", "json")
 
 	cfg, err := config.Load(path)
 	if err != nil {

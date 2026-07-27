@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/keywatch/agent/internal/app"
-	"github.com/keywatch/agent/internal/domain"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/app"
+	"github.com/hoaithuonguit/diagnostack-agent/internal/domain"
 )
 
 // ── mock collector ────────────────────────────────────────────────────────────

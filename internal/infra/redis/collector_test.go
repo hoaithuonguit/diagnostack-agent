@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	infraredis "github.com/keywatch/agent/internal/infra/redis"
+	infraredis "github.com/hoaithuonguit/diagnostack-agent/internal/infra/redis"
 )
 
 // ── parseInfoOutput ───────────────────────────────────────────────────────────

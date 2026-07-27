@@ -59,7 +59,7 @@ func (c *RedisCollector) probeCapabilities(ctx context.Context) (Capabilities, e
 			// Return an error so New() can fail fast with a clear message.
 			return caps, &ACLError{
 				Command: "INFO",
-				Hint:    "grant the INFO command: ACL SETUSER keywatch +info ~* on ><password>",
+				Hint:    "grant the INFO command: ACL SETUSER diagnostack +info ~* on ><password>",
 			}
 		}
 		// Transient error — assume INFO is available, let Collect() handle it.
@@ -77,7 +77,7 @@ func (c *RedisCollector) probeCapabilities(ctx context.Context) (Capabilities, e
 	if slowErr != nil && IsACLDenied(slowErr) {
 		caps.Slowlog = false
 		c.logger.Warn("SLOWLOG denied by Redis ACL — slowlog analysis will be unavailable",
-			slog.String("acl_hint", "grant: ACL SETUSER keywatch +slowlog ~* on ><password>"),
+			slog.String("acl_hint", "grant: ACL SETUSER diagnostack +slowlog ~* on ><password>"),
 		)
 	} else {
 		caps.Slowlog = true
@@ -91,7 +91,7 @@ func (c *RedisCollector) probeCapabilities(ctx context.Context) (Capabilities, e
 	if latErr != nil && IsACLDenied(latErr) {
 		caps.Latency = false
 		c.logger.Warn("LATENCY LATEST denied by Redis ACL — latency samples will be unavailable",
-			slog.String("acl_hint", "grant: ACL SETUSER keywatch +latency ~* on ><password>"),
+			slog.String("acl_hint", "grant: ACL SETUSER diagnostack +latency ~* on ><password>"),
 		)
 	} else {
 		caps.Latency = true
@@ -116,7 +116,7 @@ func (c *RedisCollector) logCapabilitySummary(caps Capabilities) {
 		slog.String("addr", c.cfg.Addr),
 		slog.Any("disabled", disabled),
 		slog.String("impact", capabilityImpact(caps)),
-		slog.String("docs", "https://docs.keywatch.io/agent/acl-setup"),
+		slog.String("docs", "https://docs.diagnostack.io/agent/acl-setup"),
 	)
 }
 
