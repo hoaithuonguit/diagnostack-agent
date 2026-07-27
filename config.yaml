@@ -1,0 +1,52 @@
+# Diagnostack Agent Configuration
+# Default location: /etc/diagnostack/config.yaml
+#
+# All values can be overridden via environment variables — see docs.
+# The agent will use these defaults if a key is missing from this file.
+
+# agent_id is auto-generated on first run and persisted to
+# /etc/diagnostack/agent_id. You can pin it here if you manage config via
+# configuration management tools (Ansible, Chef, etc.).
+agent_id: ""
+
+# server_label appears in the Diagnostack UI to identify this Redis instance.
+# Defaults to the system hostname if empty.
+server_label: ""
+
+# Redis connection settings.
+redis:
+  addr: "127.0.0.1:6379"
+  password: ""
+  db: 0
+
+# Diagnostack Ingestion API settings.
+api:
+  endpoint: "https://ingest.diagnostack.io/v1/ingest"
+  # api_key is required. Prefer the DIAGNOSTACK_API_KEY environment variable
+  # over setting it here to avoid storing secrets in the config file.
+  api_key: ""
+  timeout: 10s
+
+# How often the agent polls Redis.
+# Minimum: 1s. Recommended: 15s for production.
+collect_interval: 15s
+
+# Max time allowed for a single collect cycle (INFO + LATENCY + SLOWLOG).
+# Must be less than collect_interval. If Redis is slow or overloaded and
+# a collect takes longer than this, it is cancelled and the tick is skipped.
+collect_timeout: 10s
+
+# Maximum number of snapshots held in the in-memory ring buffer.
+# Each snapshot is ~5-20 KB. 200 × 20 KB = ~4 MB worst case.
+buffer_capacity: 200
+
+# Retry policy for failed shipments to the Ingestion API.
+retry:
+  max_attempts: 5      # total attempts (1 = no retry)
+  base_delay: 1s       # wait before first retry
+  max_delay: 60s       # caps exponential growth
+
+# Logging settings.
+log:
+  level: "info"        # debug | info | warn | error
+  format: "text"       # text | json (use json for log aggregators)
