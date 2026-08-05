@@ -7,13 +7,19 @@ import "time"
 // Snapshot is a single point-in-time observation of a Redis server.
 // It is the canonical unit of data that flows through the agent pipeline.
 type Snapshot struct {
-	AgentID     string          `json:"agent_id"`
-	ServerLabel string          `json:"server_label"`
-	CollectedAt time.Time       `json:"collected_at"`
-	RedisVersion string         `json:"redis_version"`
-	Metrics     Metrics         `json:"metrics"`
-	Slowlog     []SlowlogEntry  `json:"slowlog"`
-	Latency     []LatencySample `json:"latency"`
+	AgentID      string          `json:"agent_id"`
+	ServerLabel  string          `json:"server_label"`
+	CollectedAt  time.Time       `json:"collected_at"`
+	RedisVersion string          `json:"redis_version"`
+	Metrics      Metrics         `json:"metrics"`
+	Slowlog      []SlowlogEntry  `json:"slowlog"`
+	Latency      []LatencySample `json:"latency"`
+
+	// DisabledCapabilities lists commands the agent's Redis ACL user is not
+	// permitted to run (e.g. "SLOWLOG", "LATENCY"). Populated by the collector
+	// at startup so the backend can surface a clear message in the UI instead
+	// of silently showing gaps in the data.
+	DisabledCapabilities []string `json:"disabled_capabilities,omitempty"`
 }
 
 // Metrics holds the key-value fields extracted from Redis INFO.
