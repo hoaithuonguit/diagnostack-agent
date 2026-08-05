@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+# Cancel superseded runs on the same PR/branch to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GO_VERSION: "1.22"
+  # Minimum allowed total coverage, computed over all packages EXCEPT
+  # cmd/agent (thin main() wiring, not unit-testable) and internal/domain
+  # (plain structs/interfaces, no logic to cover). Raise this over time as
+  # internal/infra/redis gains testcontainers-go integration tests.
+  COVERAGE_THRESHOLD: 70
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build, vet, test, coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go.sum
+
+      - name: Check formatting (gofmt)
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "The following files are not gofmt-formatted:"
+            echo "$unformatted"
+            echo ""
+            echo "Run 'gofmt -w .' locally and commit the result."
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Build
+        run: go build ./...
+
+      - name: Test with coverage
+        run: go test ./... -race -coverprofile=coverage.out -covermode=atomic
+
+      - name: Enforce coverage threshold
+        run: |
+          # Exclude packages with no meaningful unit-testable logic:
+          #   cmd/agent      - main() wiring, exercised by integration/e2e, not unit tests
+          #   internal/domain - plain structs and port interfaces, no behavior to cover
+          grep -v -E "diagnostack-agent/(cmd/agent|internal/domain)/" coverage.out > coverage.filtered.out
+
+          TOTAL=$(go tool cover -func=coverage.filtered.out | tail -1 | awk '{print $3}' | tr -d '%')
+          echo "Coverage (excluding cmd/agent, internal/domain): ${TOTAL}%"
+          echo "### Coverage: ${TOTAL}% (threshold ${COVERAGE_THRESHOLD}%)" >> "$GITHUB_STEP_SUMMARY"
+
+          go tool cover -func=coverage.filtered.out | awk '{printf "%-70s %s\n", $1, $3}' >> "$GITHUB_STEP_SUMMARY"
+
+          awk -v total="$TOTAL" -v threshold="$COVERAGE_THRESHOLD" \
+            'BEGIN { exit (total + 0 < threshold + 0) ? 1 : 0 }' \
+            || { echo "Coverage ${TOTAL}% is below the ${COVERAGE_THRESHOLD}% threshold."; exit 1; }
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.out
+            coverage.filtered.out
+          retention-days: 14
