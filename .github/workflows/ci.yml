@@ -18,6 +18,7 @@ env:
   # (plain structs/interfaces, no logic to cover). Raise this over time as
   # internal/infra/redis gains testcontainers-go integration tests.
   COVERAGE_THRESHOLD: 70
+  COVERAGE_EXCLUDE_PACKAGES: "diagnostack-agent/(cmd/agent|internal/domain)$"
 
 permissions:
   contents: read
@@ -62,7 +63,7 @@ jobs:
           # Exclude packages with no meaningful unit-testable logic:
           #   cmd/agent      - main() wiring, exercised by integration/e2e, not unit tests
           #   internal/domain - plain structs and port interfaces, no behavior to cover
-          grep -v -E "diagnostack-agent/(cmd/agent|internal/domain)/" coverage.out > coverage.filtered.out
+          grep -v -E "$COVERAGE_EXCLUDE_PACKAGES" coverage.out > coverage.filtered.out
 
           TOTAL=$(go tool cover -func=coverage.filtered.out | tail -1 | awk '{print $3}' | tr -d '%')
           echo "Coverage (excluding cmd/agent, internal/domain): ${TOTAL}%"
