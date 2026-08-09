@@ -140,7 +140,7 @@ func Load(configPath string) (*FullConfig, error) {
 			},
 		},
 		Redis: RedisConfig{
-			Addr:           f.Redis.Addr,
+			Addr:        f.Redis.Addr,
 			Password:    f.Redis.Password,
 			DB:          f.Redis.DB,
 			AgentID:     f.AgentID,

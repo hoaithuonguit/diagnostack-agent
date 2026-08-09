@@ -3,8 +3,8 @@ package app
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"github.com/hoaithuonguit/diagnostack-agent/internal/domain"
+	"log/slog"
 )
 
 // CollectUseCase polls Redis via the Collector port and enqueues the
@@ -14,10 +14,10 @@ import (
 // It orchestrates the collect → buffer pipeline and delegates error
 // health tracking to CollectHealth.
 type CollectUseCase struct {
-	collector       domain.Collector
-	buffer          SnapshotEnqueuer
-	health          *CollectHealth
-	logger          *slog.Logger
+	collector domain.Collector
+	buffer    SnapshotEnqueuer
+	health    *CollectHealth
+	logger    *slog.Logger
 }
 
 // SnapshotEnqueuer is the narrow interface the CollectUseCase needs from
@@ -35,10 +35,10 @@ func NewCollectUseCase(
 	logger *slog.Logger,
 ) *CollectUseCase {
 	return &CollectUseCase{
-		collector:       collector,
-		buffer:          buffer,
-		health:          NewCollectHealth(logger),
-		logger:          logger,
+		collector: collector,
+		buffer:    buffer,
+		health:    NewCollectHealth(logger),
+		logger:    logger,
 	}
 }
 
