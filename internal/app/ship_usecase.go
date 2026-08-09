@@ -68,7 +68,8 @@ func (uc *ShipUseCase) DrainOnce(ctx context.Context) {
 //
 // Backoff formula:  min(base * 2^(attempt-1) + jitter, max)
 // Jitter:           ±20% of the computed delay — prevents thundering herd
-//                   when multiple agents reconnect after an outage.
+//
+//	when multiple agents reconnect after an outage.
 func (uc *ShipUseCase) shipWithRetry(ctx context.Context, snapshot *domain.Snapshot) {
 	for attempt := 1; attempt <= uc.cfg.MaxAttempts; attempt++ {
 		err := uc.shipper.Ship(ctx, snapshot)

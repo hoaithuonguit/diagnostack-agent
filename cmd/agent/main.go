@@ -19,8 +19,8 @@ import (
 
 	"github.com/hoaithuonguit/diagnostack-agent/config"
 	"github.com/hoaithuonguit/diagnostack-agent/internal/app"
-	infrahttp "github.com/hoaithuonguit/diagnostack-agent/internal/infra/http"
 	"github.com/hoaithuonguit/diagnostack-agent/internal/infra/buffer"
+	infrahttp "github.com/hoaithuonguit/diagnostack-agent/internal/infra/http"
 	infraredis "github.com/hoaithuonguit/diagnostack-agent/internal/infra/redis"
 )
 
