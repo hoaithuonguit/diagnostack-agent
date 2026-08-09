@@ -38,16 +38,16 @@ jobs:
           cache: true
           cache-dependency-path: go.sum
 
-      # - name: Check formatting (gofmt)
-      #   run: |
-      #     unformatted=$(gofmt -l .)
-      #     if [ -n "$unformatted" ]; then
-      #       echo "The following files are not gofmt-formatted:"
-      #       echo "$unformatted"
-      #       echo ""
-      #       echo "Run 'gofmt -w .' locally and commit the result."
-      #       exit 1
-      #     fi
+      - name: Check formatting (gofmt)
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "The following files are not gofmt-formatted:"
+            echo "$unformatted"
+            echo ""
+            echo "Run 'gofmt -w .' locally and commit the result."
+            exit 1
+          fi
 
       - name: Vet
         run: go vet ./...
