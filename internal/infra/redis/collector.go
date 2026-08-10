@@ -111,6 +111,16 @@ func (c *RedisCollector) Collect(ctx context.Context) (*domain.Snapshot, error) 
 		return nil, fmt.Errorf("INFO: %w", err)
 	}
 	fields := parseInfoOutput(rawInfo)
+
+	if c.caps.Config {
+		if val, cfgErr := c.collectAppendFsync(ctx); cfgErr != nil {
+			c.logger.Warn("CONFIG GET appendfsync failed — shipping without it",
+				slog.String("error", cfgErr.Error()))
+		} else {
+			fields["appendfsync"] = val
+		}
+	}
+
 	metrics := buildMetrics(fields)
 
 	snapshot := &domain.Snapshot{
@@ -226,6 +236,16 @@ func (c *RedisCollector) collectLatency(ctx context.Context) ([]domain.LatencySa
 	return samples, nil
 }
 
+// collectAppendFsync fetches the configured AOF fsync policy. This is a
+// CONFIG value, not part of INFO, so it needs its own call.
+func (c *RedisCollector) collectAppendFsync(ctx context.Context) (string, error) {
+	res, err := c.client.ConfigGet(ctx, "appendfsync").Result()
+	if err != nil {
+		return "", err
+	}
+	return res["appendfsync"], nil
+}
+
 // toInt64 handles the fact that RESP integers may arrive as int64 already
 // (RESP2 via go-redis) depending on client/protocol negotiation.
 func toInt64(v interface{}) int64 {
@@ -247,6 +267,8 @@ func toInt64(v interface{}) int64 {
 // failing the whole collect cycle — a partial snapshot is more useful than
 // none.
 func buildMetrics(f map[string]string) domain.Metrics {
+	lagBytes, lagSeconds := buildReplicationLag(f)
+
 	return domain.Metrics{
 		UsedMemoryBytes:        parseInt(f["used_memory"]),
 		UsedMemoryRSSBytes:     parseInt(f["used_memory_rss"]),
@@ -254,16 +276,76 @@ func buildMetrics(f map[string]string) domain.Metrics {
 		MemFragmentationRatio:  parseFloat(f["mem_fragmentation_ratio"]),
 		ConnectedClients:       parseInt(f["connected_clients"]),
 		BlockedClients:         parseInt(f["blocked_clients"]),
+		MaxClients:             parseInt(f["maxclients"]),
 		InstantaneousOpsPerSec: parseInt(f["instantaneous_ops_per_sec"]),
 		KeyspaceHits:           parseInt(f["keyspace_hits"]),
 		KeyspaceMisses:         parseInt(f["keyspace_misses"]),
 		EvictedKeys:            parseInt(f["evicted_keys"]),
 		RejectedConnections:    parseInt(f["rejected_connections"]),
-		ReplicationLagBytes:    parseInt(f["master_repl_offset"]),
+		ReplicationLagBytes:    lagBytes,
+		ReplicationLagSeconds:  lagSeconds,
+		ConnectedSlaves:        parseInt(f["connected_slaves"]),
 		Role:                   f["role"],
 		RDBLastSaveTime:        parseInt(f["rdb_last_save_time"]),
+		RDBBgsaveInProgress:    parseInt(f["rdb_bgsave_in_progress"]) == 1,
+		AppendFsync:            f["appendfsync"],
 		UptimeInSeconds:        parseInt(f["uptime_in_seconds"]),
 	}
+}
+
+// buildReplicationLag computes replication lag from whatever a single INFO
+// call can see.
+//
+// On a master, INFO replication includes one "slaveN" line per connected
+// replica — "ip=...,port=...,state=...,offset=N,lag=N" — plus the master's
+// own master_repl_offset. Byte lag for a given replica is
+// master_repl_offset minus that replica's reported offset; we report the
+// maximum across replicas, since that is the one furthest behind.
+//
+// On a replica, the master's offset isn't visible in this instance's own
+// INFO output, so byte lag can't be computed from here. We fall back to
+// master_last_io_seconds_ago — Redis's own signal for how long it's been
+// since the replica last heard from its master.
+func buildReplicationLag(f map[string]string) (lagBytes int64, lagSeconds int64) {
+	switch f["role"] {
+	case "master":
+		masterOffset := parseInt(f["master_repl_offset"])
+		slaveCount := parseInt(f["connected_slaves"])
+
+		var maxLag int64
+		for i := int64(0); i < slaveCount; i++ {
+			raw, ok := f[fmt.Sprintf("slave%d", i)]
+			if !ok {
+				continue
+			}
+			offset := parseInt(parseSlaveLine(raw)["offset"])
+			if lag := masterOffset - offset; lag > maxLag {
+				maxLag = lag
+			}
+		}
+		return maxLag, 0
+
+	case "slave":
+		return 0, parseInt(f["master_last_io_seconds_ago"])
+
+	default:
+		return 0, 0
+	}
+}
+
+// parseSlaveLine parses a Redis "slaveN:" INFO value, e.g.
+// "ip=127.0.0.1,port=6380,state=online,offset=14355,lag=0" into a
+// key/value map.
+func parseSlaveLine(raw string) map[string]string {
+	kv := make(map[string]string)
+	for _, part := range strings.Split(raw, ",") {
+		k, v, found := strings.Cut(part, "=")
+		if !found {
+			continue
+		}
+		kv[k] = v
+	}
+	return kv
 }
 
 func parseInt(s string) int64 {
