@@ -22,6 +22,10 @@ type Capabilities struct {
 	// Latency is true if the agent can run LATENCY LATEST.
 	// Non-fatal if false — latency samples are omitted from the Snapshot.
 	Latency bool
+	// Config is true if the agent can run CONFIG GET.
+	// Non-fatal if false — AppendFsync is omitted from the Snapshot,
+	// degrading the AOF_FSYNC_BLOCKING rule to unavailable.
+	Config bool
 }
 
 // disabled returns the list of capability names that are false.
@@ -33,6 +37,9 @@ func (c Capabilities) Disabled() []string {
 	}
 	if !c.Latency {
 		out = append(out, "LATENCY")
+	}
+	if !c.Config {
+		out = append(out, "CONFIG")
 	}
 	return out
 }
@@ -97,6 +104,20 @@ func (c *RedisCollector) probeCapabilities(ctx context.Context) (Capabilities, e
 		caps.Latency = true
 	}
 
+	// ── CONFIG ───────────────────────────────────────────────────────────────
+	probeCtx, cancel = context.WithTimeout(ctx, 3*time.Second)
+	_, cfgErr := c.client.ConfigGet(probeCtx, "appendfsync").Result()
+	cancel()
+
+	if cfgErr != nil && IsACLDenied(cfgErr) {
+		caps.Config = false
+		c.logger.Warn("CONFIG GET denied by Redis ACL — AOF fsync detection will be unavailable",
+			slog.String("acl_hint", "grant: ACL SETUSER diagnostack +config|get ~* on ><password>"),
+		)
+	} else {
+		caps.Config = true
+	}
+
 	return caps, nil
 }
 
@@ -124,12 +145,16 @@ func (c *RedisCollector) logCapabilitySummary(caps Capabilities) {
 // will lose due to the disabled capabilities.
 func capabilityImpact(caps Capabilities) string {
 	switch {
+	case !caps.Slowlog && !caps.Latency && !caps.Config:
+		return "metrics only — root-cause analysis (slowlog + latency) and AOF fsync detection unavailable"
 	case !caps.Slowlog && !caps.Latency:
 		return "metrics only — root-cause analysis (slowlog + latency) unavailable"
 	case !caps.Slowlog:
 		return "slowlog analysis unavailable — cannot identify slow commands"
 	case !caps.Latency:
 		return "latency samples unavailable — tail latency charts will be empty"
+	case !caps.Config:
+		return "AOF fsync config unavailable — cannot evaluate the AOF_FSYNC_BLOCKING rule"
 	default:
 		return "full observability available"
 	}

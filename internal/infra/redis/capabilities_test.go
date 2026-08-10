@@ -72,23 +72,33 @@ func TestCapabilities_Disabled(t *testing.T) {
 	}{
 		{
 			name: "all available",
-			caps: infraredis.Capabilities{Info: true, Slowlog: true, Latency: true},
+			caps: infraredis.Capabilities{Info: true, Slowlog: true, Latency: true, Config: true},
 			want: nil,
 		},
 		{
 			name: "slowlog denied",
-			caps: infraredis.Capabilities{Info: true, Slowlog: false, Latency: true},
+			caps: infraredis.Capabilities{Info: true, Slowlog: false, Latency: true, Config: true},
 			want: []string{"SLOWLOG"},
 		},
 		{
 			name: "latency denied",
-			caps: infraredis.Capabilities{Info: true, Slowlog: true, Latency: false},
+			caps: infraredis.Capabilities{Info: true, Slowlog: true, Latency: false, Config: true},
 			want: []string{"LATENCY"},
 		},
 		{
-			name: "both denied",
-			caps: infraredis.Capabilities{Info: true, Slowlog: false, Latency: false},
+			name: "config denied",
+			caps: infraredis.Capabilities{Info: true, Slowlog: true, Latency: true, Config: false},
+			want: []string{"CONFIG"},
+		},
+		{
+			name: "slowlog and latency denied",
+			caps: infraredis.Capabilities{Info: true, Slowlog: false, Latency: false, Config: true},
 			want: []string{"SLOWLOG", "LATENCY"},
+		},
+		{
+			name: "all three denied",
+			caps: infraredis.Capabilities{Info: true, Slowlog: false, Latency: false, Config: false},
+			want: []string{"SLOWLOG", "LATENCY", "CONFIG"},
 		},
 	}
 
